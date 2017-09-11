@@ -52,8 +52,3 @@ Related PEPs:
 * Function annotations:  https://www.python.org/dev/peps/pep-3107/.
 
 * Variable annotations:  https://www.python.org/dev/peps/pep-0526/.
-
-* An explanation of the theory behind type hints can be found in
-  https://www.python.org/dev/peps/pep-0483/.
-
-* A literature review is at https://www.python.org/dev/peps/pep-0482/.
