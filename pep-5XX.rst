@@ -71,6 +71,8 @@ might not preserve the exact formatting of the source.
 
 Annotations need to be syntactically valid Python expressions, also when
 passed as literal strings (i.e. ``compile(literal, '', 'eval')``).
+Annotations can only use names present in the module scope as postponed
+evaluation using local names is not reliable.
 
 Note that as per PEP 526, local variable annotations are not evaluated
 at all since they are not accessible outside of the function's closure.
@@ -95,10 +97,14 @@ correctly evaluates expressions back from its string form.  Note that
 all valid code currently using ``__annotations__`` should already be
 doing that since a type annotation can be expressed as a string literal.
 
-For code which uses annotations for different purposes, ``FunctionX`` is
-provided which resolves the annotation correctly, providing the right
-globals to the compiler.  Using ``eval()`` directly is not recommended
-due to this reason.
+For code which uses annotations for other purposes, a regular
+``eval(ann, globals, locals)`` call is enough to resolve the
+annotation.  The trick here is to get the correct value for globals.
+Fortunately, in the case of functions, they hold a reference to globals
+in an attribute called ``__globals__``.  To get the correct module-level
+context to resolve class variables, use::
+
+    cls_globals = sys.modules[SomeClass.__module__].__dict__
 
 Runtime annotation resolution and class decorators
 --------------------------------------------------
@@ -163,11 +169,10 @@ Backwards Compatibility
 
 This is a backwards incompatible change.  Applications depending on
 arbitrary objects to be directly present in annotations will break
-if they are not using ``typing.get_type_hints()`` or ``FunctionX``.
+if they are not using ``typing.get_type_hints()`` or ``eval()``.
 
-Resolving function or class variable annotations that depend on
-function-local closures at the time of the function/class definition is
-no longer possible.  Example::
+Annotations that depend on locals at the time of the function/class
+definition are now invalid.  Example::
 
     def generate_class():
         some_local = datetime.datetime.now()
@@ -177,22 +182,7 @@ no longer possible.  Example::
                 ...
 
 Annotations using nested classes and their respective state are still
-valid.  Example::
-
-    class C:
-        field = 'c_field'
-        def method(self, arg: field) -> None:  # this is OK
-            ...
-
-        class D:
-            field2 = 'd_field'
-            def method(self, arg: field -> field2:  # this is OK
-                ...
-
-Note that if ``field`` and ``field2`` shared a name, addressing both
-would no longer be possible due to variable shadowing.  It would also
-be misleading to the reader.  Thus, using a fully qualified name is
-now recommended.  Modifying the previous example::
+valid, provided they use the fully qualified name.  Example::
 
     class C:
         field = 'c_field'
@@ -201,8 +191,12 @@ now recommended.  Modifying the previous example::
 
         class D:
             field2 = 'd_field'
-            def method(self, arg: C.field -> D.field2:  # this is OK
+            def method(self, arg: C.field -> C.D.field2:  # this is OK
                 ...
+
+In the presence of an annotation that cannot be resolved using the
+current module's globals, a NameError is raised at compile time.
+
 
 Deprecation policy
 ------------------
@@ -213,6 +207,33 @@ compiler in the presence of type annotations in modules without the
 ``__future__`` import.  In Python 3.8 the warning becomes a
 ``DeprecationWarning``.  In the next version this will become the
 default behavior.
+
+
+Rejected Ideas
+==============
+
+Keep the ability to use local state when defining annotations
+-------------------------------------------------------------
+
+With postponed evaluation, this is impossible for function locals.  For
+classes, it would be possible to keep the ability to define annotations
+using the local scope.  However, when using ``eval()`` to perform the
+postponed evaluation, we need to provide the correct globals and locals
+to the ``eval()`` call.  In the face of nested classes, the routine to
+get the effective "globals" at definition time would have to look
+something like this::
+
+    def get_class_globals(cls):
+        result = {}
+        result.update(sys.modules[cls.__module__].__dict__)
+        for child in cls.__qualname__.split('.'):
+            result.update(result[child].__dict__)
+        return result
+
+This is brittle and doesn't even cover slots.  Requiring the use of
+module-level names simplifies runtime evaluation and provides the
+"one obvious way" to read annotations.  It's the equivalent of absolute
+imports.
 
 
 PEP Development Process

@@ -5,8 +5,7 @@ Note: globals and functions are purposefully out of order to demonstrate the
 forward reference problem.
 """
 
-from util import get_class_globals
-
+import sys
 from typing import no_type_check
 
 
@@ -18,8 +17,11 @@ def function_with_arbitrary_annotations(a: 'SOME_GLOBAL + "1"') -> '{"s": SOME_G
 class C:
     CLASS_VAR: 'SOME_GLOBAL + "2"' = 'CLASS_VAR_VALUE'
 
-    def method_with_arbitrary_annotations(a: 'SOME_GLOBAL + "3"') -> '{"s": CLASS_VAR}':
-        """Note: The no_type_check decorator here is missing to demonstrate that
+    def method_with_arbitrary_annotations(a: 'SOME_GLOBAL + "3"') -> '{"s": C.CLASS_VAR}':
+        """Note: CLASS_VAR needs to be prefixed with the class it comes from.
+        Only module-level names can be used for annotations now.
+
+        Also, the no_type_check decorator here is missing to demonstrate that
         postponed evaluation doesn't require it. It's still recommended though.
         """
 
@@ -38,29 +40,26 @@ def evaluate_method():
     # unbound, just a function object
     c_meth = C.method_with_arbitrary_annotations
     c_meth_globals = c_meth.__globals__
-    c_locals = get_class_globals(C)  # we need to know the class, if any
     c_meth_annotations = {}
     for k, v in C.method_with_arbitrary_annotations.__annotations__.items():
-        c_meth_annotations[k] = eval(v, c_meth_globals, c_locals)
+        c_meth_annotations[k] = eval(v, c_meth_globals, c_meth_globals)
     print(f'Method on {C}: {c_meth_annotations}')
 
     # bound, can use __self__
     c_meth = C().method_with_arbitrary_annotations
     c_meth_globals = c_meth.__globals__
-    c_locals = get_class_globals(c_meth.__self__.__class__)  # note: NOT the instance's dict
     c_meth_annotations = {}
     for k, v in C.method_with_arbitrary_annotations.__annotations__.items():
-        c_meth_annotations[k] = eval(v, c_meth_globals, c_locals)
+        c_meth_annotations[k] = eval(v, c_meth_globals, c_meth_globals)
     print(f'Method on an instance of {C}: {c_meth_annotations}')
 
 
 def evaluate_classvar():
     """Demonstrates how to evaluate classvar annotations."""
-    c_globals = get_class_globals(C)
-    c_locals = C.__dict__
+    c_globals = sys.modules[C.__module__].__dict__
     c_annotations = {}
     for k, v in C.__annotations__.items():
-        c_annotations[k] = eval(v, c_globals, c_locals)
+        c_annotations[k] = eval(v, c_globals, c_globals)
     print(f'Class vars for {C}: {c_annotations}')
 
 

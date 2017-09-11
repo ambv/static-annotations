@@ -1,3 +1,5 @@
+"""This example will no longer work after PEP 5XX is accepted and implemented."""
+
 from enum import Enum
 from typing import List, get_type_hints
 
