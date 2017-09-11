@@ -284,21 +284,3 @@ This document has been placed in the public domain.
    fill-column: 70
    coding: utf-8
    End:
-
-
-### Remaining things from PEP 484
-
-
-A compromise is possible where a ``__future__`` import could enable
-turning *all* annotations in a given module into string literals, as
-follows::
-
-  from __future__ import annotations
-
-  class ImSet:
-      def add(self, a: ImSet) -> List[ImSet]: ...
-
-  assert ImSet.add.__annotations__ == {'a': 'ImSet', 'return': 'List[ImSet]'}
-
-Such a ``__future__`` import statement may be proposed in a separate
-PEP.
