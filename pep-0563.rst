@@ -25,6 +25,9 @@ This PEP proposes changing function annotations and variable annotations
 so that they are no longer evaluated at function definition time.
 Instead, they are preserved in ``__annotations__`` in string form.
 
+This change is going to be introduced gradually, starting with a new
+``__future__`` import in Python 3.7.
+
 
 Rationale and Goals
 ===================
