@@ -1,4 +1,4 @@
-PEP: 5XX
+PEP: 563
 Title: Postponed Evaluation of Annotations
 Version: $Revision$
 Last-Modified: $Date$
@@ -266,7 +266,7 @@ References
    https://github.com/python/static-annotations/issues
 
 .. [peps]
-   https://github.com/python/peps/blob/master/pep-05XX.txt
+   https://github.com/python/peps/blob/master/pep-0563.rst
 
 
 Copyright
