@@ -239,37 +239,12 @@ module-level names simplifies runtime evaluation and provides the
 imports.
 
 
-PEP Development Process
-=======================
-
-A live draft for this PEP lives on GitHub [github]_.  There is also an
-issue tracker [issues]_, where much of the technical discussion takes
-place.
-
-The draft on GitHub is updated regularly in small increments.  The
-official PEPS repo [peps]_ is (usually) only updated when a new draft
-is posted to python-dev.
-
-
 Acknowledgements
 ================
 
 This document could not be completed without valuable input,
 encouragement and advice from Guido van Rossum, Jukka Lehtosalo, and
 Ivan Levkivskyi.
-
-
-References
-==========
-
-.. [github]
-   https://github.com/ambv/static-annotations
-
-.. [issues]
-   https://github.com/python/static-annotations/issues
-
-.. [peps]
-   https://github.com/python/peps/blob/master/pep-0563.rst
 
 
 Copyright
