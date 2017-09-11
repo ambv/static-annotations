@@ -1,5 +1,5 @@
 ============================================
-PEP 5XX: Postponed Evaluation of Annotations
+PEP 563: Postponed Evaluation of Annotations
 ============================================
 
 This GitHub repo is used for drafting of this PEP.  Technical discussion
@@ -42,8 +42,8 @@ The dates for Python 3.7 are based on PEP 537 and may still change.
 Important URLs
 --------------
 
-The python.org rendering of PEP 5XX will live at
-https://www.python.org/dev/peps/pep-05XX/ when a number gets assigned.
+The python.org rendering of PEP 563 will live at
+https://www.python.org/dev/peps/pep-0563/.
 
 Related PEPs:
 
