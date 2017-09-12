@@ -239,6 +239,36 @@ module-level names simplifies runtime evaluation and provides the
 imports.
 
 
+Introduce a new dictionary for the string literal form instead
+--------------------------------------------------------------
+
+Yury Selivanov shared the following idea:
+
+1. Add a new special attribute to functions: ``__annotations_text__``.
+
+2. Make ``__annotations__`` a lazy dynamic mapping, evaluating
+   expressions from the corresponding key in ``__annotations_text__``
+   just-in-time.
+
+This idea is supposed to solve the backwards compatibility issue,
+removing the need for a new ``__future__`` import.  Sadly, this is not
+enough.  Postponed evaluation changes which state the annotation has
+access to.  While postponed evaluation fixes the forward reference
+problem, it also makes it impossible to access function-level locals
+anymore.  This alone is a source of backwards incompatibility which
+justifies a deprecation period.
+
+A ``__future__`` import is an obvious and explicit indicator of opting
+in for the new functionality.  It also makes it trivial for external
+tools to recognize the difference between a Python files using the old
+or the new approach.  In the former case, that tool would recognize that
+local state access is allowed, whereas in the latter case it would
+recognize that forward references are allowed.
+
+Finally, just-in-time evaluation in ``__annotations__`` is an
+unnecessary step if ``get_type_hints()`` is used later.
+
+
 Acknowledgements
 ================
 
