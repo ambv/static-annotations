@@ -108,7 +108,7 @@ Fortunately, in the case of functions, they hold a reference to globals
 in an attribute called ``__globals__``.  To get the correct module-level
 context to resolve class variables, use::
 
-    cls_globals = sys.modules[SomeClass.__module__].__dict__
+    cls_globals = vars(sys.modules[SomeClass.__module__])
 
 Runtime annotation resolution and class decorators
 --------------------------------------------------
@@ -229,9 +229,9 @@ something like this::
 
     def get_class_globals(cls):
         result = {}
-        result.update(sys.modules[cls.__module__].__dict__)
+        result.update(vars(sys.modules[cls.__module__]))
         for child in cls.__qualname__.split('.'):
-            result.update(result[child].__dict__)
+            result.update(vars(result[child]))
         return result
 
 This is brittle and doesn't even cover slots.  Requiring the use of
