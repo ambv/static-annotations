@@ -96,19 +96,40 @@ Resolving Type Hints at Runtime
 To resolve an annotation at runtime from its string form to the result
 of the enclosed expression, user code needs to evaluate the string.
 
-For code that uses type hints, the ``typing.get_type_hints()`` function
+For code that uses type hints, the
+``typing.get_type_hints(obj, globalns=None, localns=None)`` function
 correctly evaluates expressions back from its string form.  Note that
 all valid code currently using ``__annotations__`` should already be
 doing that since a type annotation can be expressed as a string literal.
 
 For code which uses annotations for other purposes, a regular
 ``eval(ann, globals, locals)`` call is enough to resolve the
-annotation.  The trick here is to get the correct value for globals.
-Fortunately, in the case of functions, they hold a reference to globals
-in an attribute called ``__globals__``.  To get the correct module-level
-context to resolve class variables, use::
+annotation.
+
+In both cases it's important to consider how globals and locals affect
+the postponed evaluation.  An annotation is no longer evaluated at the
+time of definition and, more importantly, *where* it was defined.
+Consequently, using local state in annotations is no longer possible.
+As for globals, the module where the annotation was defined is the
+correct context for postponed evaluation.
+
+The ``get_type_hints()`` function automatically resolves the correct
+value of ``globalns`` for functions and classes.  When running ``eval()``,
+the value of globals can be gathered in the following way:
+
+* function objects hold a reference to their respective globals in an
+  attribute called ``__globals__``;
+
+* classes hold the name of the module they were defined in, this can be
+  used to retrieve the respective globals::
 
     cls_globals = vars(sys.modules[SomeClass.__module__])
+
+  Note that this needs to be repeated for base classes to evaluate all
+  ``__annotations__``.
+
+* modules should use their own ``__dict__``.
+
 
 Runtime annotation resolution and class decorators
 --------------------------------------------------
