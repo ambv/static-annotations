@@ -54,8 +54,9 @@ will remain a dynamically typed language, and the authors have no desire
 to ever make type hints mandatory, even by convention.**
 
 Annotations are still available for arbitrary use besides type checking.
-Using ``@typing.no_type_hints`` in this case is recommended to
-disambiguate the use case.
+As described in PEP 484, using ``@typing.no_type_check`` in this case is
+recommended to disambiguate the use case.  ``# type: ignore`` comments
+are also available for this purpose.  Refer to PEP 484 for details.
 
 
 Implementation
