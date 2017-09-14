@@ -58,6 +58,10 @@ As described in PEP 484, using ``@typing.no_type_check`` in this case is
 recommended to disambiguate the use case.  ``# type: ignore`` comments
 are also available for this purpose.  Refer to PEP 484 for details.
 
+Annotations without forced evaluation enable opportunities to improve
+the syntax of type hints.  This idea will require its own separate PEP
+and is not discussed further in this document.
+
 
 Implementation
 ==============
@@ -289,6 +293,149 @@ recognize that forward references are allowed.
 
 Finally, just-in-time evaluation in ``__annotations__`` is an
 unnecessary step if ``get_type_hints()`` is used later.
+
+
+Prior discussion
+================
+
+In PEP 484
+----------
+
+The forward reference problem was discussed when PEP 484 was originally
+drafted, leading to the following statement in the document:
+
+    A compromise is possible where a ``__future__`` import could enable
+    turning *all* annotations in a given module into string literals, as
+    follows::
+
+      from __future__ import annotations
+
+      class ImSet:
+          def add(self, a: ImSet) -> List[ImSet]: ...
+
+      assert ImSet.add.__annotations__ == {
+          'a': 'ImSet', 'return': 'List[ImSet]'
+      }
+
+    Such a ``__future__`` import statement may be proposed in a separate
+    PEP.
+
+python/typing#400
+-----------------
+
+The problem was discussed at length on the typing module's GitHub
+project, under `Issue 400 <https://github.com/python/typing/issues/400>`_.
+The problem statement there includes critique of generic types requiring
+imports from ``typing``.  This tends to be confusing to
+beginners:
+
+    Why this::
+
+        from typing import List, Set
+        def dir(o: object = ...) -> List[str]: ...
+        def add_friends(friends: Set[Friend]) -> None: ...
+
+    But not this::
+
+        def dir(o: object = ...) -> list[str]: ...
+        def add_friends(friends: set[Friend]) -> None ...
+
+    Why this::
+
+        up_to_ten = list(range(10))
+        friends = set()
+
+    But not this::
+
+        from typing import List, Set
+        up_to_ten = List[int](range(10))
+        friends = Set[Friend]()
+
+While typing usability is an interesting problem, it is out of scope
+of this PEP.  Specifically, any extensions of the typing syntax
+standardized in PEP 484 will require their own respective PEPs and
+approval.
+
+Issue 400 ultimately suggests postponing evaluation of annotations and
+keeping them as strings in ``__annotations__``, just like this PEP
+specifies.  This idea was received well.  Ivan Levkivskyi supported
+using the ``__future__`` import and suggested unparsing the AST in
+``compile.c``.  Jukka Lehtosalo pointed out that there are some cases
+of forward references where types are used outside of annotations and
+postponed evaluation will not help those:
+
+    * ``Alias = <type>``
+    * ``cast(<type>, e)``
+    * ``T = TypeVar('T', <type>, ...)``
+    * ``T = TypeVar('T', bound=<type>)``
+    * ``T = NewType('T', <type>)``
+    * Non-class-based syntax for named tuples
+    * Generic base classes
+
+For those cases using the string literal notation would still be
+required.
+
+The biggest controversy on the issue was Guido van Rossum's concern
+that untokenizing annotation expressions back to their string form has
+no precedent in the Python programming language and feels like a hacky
+workaround.  He said:
+
+    One thing that comes to mind is that it's a very random change to
+    the language.  It might be useful to have a more compact way to
+    indicate deferred execution of expressions (using less syntax than
+    ``lambda:``).  But why would the use case of type annotations be so
+    all-important to change the language to do it there first (rather
+    than proposing a more general solution), given that there's already
+    a solution for this particular use case that requires very minimal
+    syntax?
+
+Eventually, Ethan Smith and schollii voiced that feedback gathered
+during PyCon US suggests that the state of forward references needs
+fixing.  Guido van Rossum suggested coming back to the ``__future__``
+idea, pointing out that to prevent abuse, it's important for the
+annotations to be kept both syntactically valid and evaluating correctly
+at runtime.
+
+First draft discussion on python-ideas
+--------------------------------------
+
+Discussion happened largely in two threads, `the original announcement
+<https://mail.python.org/pipermail/python-ideas/2017-September/thread.html#47031>`_
+and a follow-up called `PEP 563 and expensive backwards compatibility
+<https://mail.python.org/pipermail/python-ideas/2017-September/thread.html#47108>`_.
+
+The PEP received rather warm feedback (4 strongly in favor,
+2 in favor with concerns, 2 against). The biggest voice of concern on
+the former thread being Steven D'Aprano's review stating that the
+problem definition of the PEP doesn't justify breaking backwards
+compatibility.  In this response Steven seemed mostly concerned about
+Python no longer supporting evaluation of annotations that depended on
+local function/class state.
+
+A few people voiced concerns that there are libraries using annotations
+for non-typing purposes.  However, none of the named libraries would be
+invalidated by this PEP.  They do require adapting to the new
+requirement to call ``eval()`` on the annotation with the correct
+``globals`` and ``locals`` set.
+
+This detail about ``globals`` and ``locals`` having to be correct was
+picked up by a number of commenters.  Nick Coghlan benchmarked turning
+annotations into lambdas instead of strings, sadly this proved to be
+much slower at runtime than the current situation.
+
+The latter thread was started by Jim J. Jewett who stressed that
+the ability to properly evaluate annotations is an important requirement
+and backwards compatibility in that regard is valuable.  After some
+discussion he admitted that side effects in annotations are a code smell
+and modal support to either perform or not perform evaluation is
+a messy solution.  His biggest concern remained loss of functionality
+stemming from the evaluation restrictions on global and local scope.
+
+Nick Coghlan pointed out that some of those evaluation restrictions from
+the PEP could be lifted by a clever implementation of an evaluation
+helper, which could solve self-referencing classes even in the form of a
+class decorator.  He suggested the PEP should provide this helper
+function in the standard library.
 
 
 Acknowledgements
