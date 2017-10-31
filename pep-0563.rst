@@ -310,6 +310,27 @@ Finally, just-in-time evaluation in ``__annotations__`` is an
 unnecessary step if ``get_type_hints()`` is used later.
 
 
+Drop annotations with -O
+------------------------
+
+There are two reasons this is not satisfying for the purpose of this
+PEP.
+
+First, this only addresses runtime cost, not forward references, those
+still cannot be safely used in source code.  A library maintainer would
+never be able to use forward references since that would force the
+library users to use this new hypothetical -O switch.
+
+Second, this throws the baby out with the bath water. Now *no* runtime
+annotation use can be performed.  PEP 557 is one example of a recent
+development where evaluating type annotations at runtime is useful.
+
+All that being said, a granular -O option to drop annotations is
+a possibility in the future, as it's conceptually compatible with
+existing -O behavior (dropping docstrings and assert statements).  This
+PEP does not invalidate the idea.
+
+
 Prior discussion
 ================
 
