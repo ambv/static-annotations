@@ -80,7 +80,8 @@ might not preserve the exact formatting of the source.
 Annotations need to be syntactically valid Python expressions, also when
 passed as literal strings (i.e. ``compile(literal, '', 'eval')``).
 Annotations can only use names present in the module scope as postponed
-evaluation using local names is not reliable.
+evaluation using local names is not reliable (with the sole exception of
+class-level names resolved by ``typing.get_type_hints()``).
 
 Note that as per PEP 526, local variable annotations are not evaluated
 at all since they are not accessible outside of the function's closure.
@@ -112,13 +113,16 @@ annotation.
 
 In both cases it's important to consider how globals and locals affect
 the postponed evaluation.  An annotation is no longer evaluated at the
-time of definition and, more importantly, *where* it was defined.
-Consequently, using local state in annotations is no longer possible.
-As for globals, the module where the annotation was defined is the
-correct context for postponed evaluation.
+time of definition and, more importantly, *in the same scope* it was
+defined.  Consequently, using local state in annotations is no longer
+possible in general.  As for globals, the module where the annotation
+was defined is the correct context for postponed evaluation.
 
 The ``get_type_hints()`` function automatically resolves the correct
-value of ``globalns`` for functions and classes.  When running ``eval()``,
+value of ``globalns`` for functions and classes.  It also automatically
+provides the correct ``localns`` for classes.
+
+When running ``eval()``,
 the value of globals can be gathered in the following way:
 
 * function objects hold a reference to their respective globals in an
@@ -133,6 +137,15 @@ the value of globals can be gathered in the following way:
   ``__annotations__``.
 
 * modules should use their own ``__dict__``.
+
+The value of ``localns`` cannot be reliably retrieved for functions
+because in all likelihood the stack frame at the time of the call no
+longer exists.
+
+For classes, ``localns`` can be composed by chaining vars of the given
+class and its base classes (in the method resolution order).  Since slots
+can only be filled after the class was defined, we don't need to consult
+them for this purpose.
 
 
 Runtime annotation resolution and class decorators
@@ -154,19 +167,6 @@ current class.  Example::
 This was already true before this PEP.  The class decorator acts on
 the class before it's assigned a name in the current definition scope.
 
-The situation is made somewhat stricter when class-level variables are
-considered.  Previously, when the string form wasn't used in annotations,
-a class decorator would be able to cover situations like::
-
-    @class_decorator
-    class Restaurant:
-        class MenuOption(Enum):
-            SPAM = 1
-            EGGS = 2
-
-        default_menu: List[MenuOption] = []
-
-This is no longer possible.
 
 Runtime annotation resolution and ``TYPE_CHECKING``
 ---------------------------------------------------
@@ -200,7 +200,7 @@ This is a backwards incompatible change.  Applications depending on
 arbitrary objects to be directly present in annotations will break
 if they are not using ``typing.get_type_hints()`` or ``eval()``.
 
-Annotations that depend on locals at the time of the function/class
+Annotations that depend on locals at the time of the function
 definition are now invalid.  Example::
 
     def generate_class():
@@ -211,7 +211,7 @@ definition are now invalid.  Example::
                 ...
 
 Annotations using nested classes and their respective state are still
-valid, provided they use the fully qualified name.  Example::
+valid.  They can use local names or the fully qualified name.  Example::
 
     class C:
         field = 'c_field'
@@ -220,11 +220,11 @@ valid, provided they use the fully qualified name.  Example::
 
         class D:
             field2 = 'd_field'
-            def method(self, arg: C.field -> C.D.field2:  # this is OK
+            def method(self, arg: C.field) -> C.D.field2:  # this is OK
                 ...
 
-In the presence of an annotation that cannot be resolved using the
-current module's globals, a NameError is raised at compile time.
+            def method(self, arg: field) -> D.field2:  # this is OK
+                ...
 
 
 Deprecation policy
@@ -241,28 +241,40 @@ default behavior.
 Rejected Ideas
 ==============
 
-Keep the ability to use local state when defining annotations
--------------------------------------------------------------
+Keep the ability to use function local state when defining annotations
+----------------------------------------------------------------------
 
-With postponed evaluation, this is impossible for function locals.  For
-classes, it would be possible to keep the ability to define annotations
-using the local scope.  However, when using ``eval()`` to perform the
-postponed evaluation, we need to provide the correct globals and locals
-to the ``eval()`` call.  In the face of nested classes, the routine to
-get the effective "globals" at definition time would have to look
-something like this::
+With postponed evaluation, this would require keeping a reference to
+the frame in which an annotation got created.  This could be achieved
+for example by storing all annotations as lambdas instead of strings.
 
-    def get_class_globals(cls):
-        result = {}
-        result.update(vars(sys.modules[cls.__module__]))
-        for child in cls.__qualname__.split('.'):
-            result.update(vars(result[child]))
-        return result
+This would be prohibitively expensive for highly annotated code as the
+frames would keep all their objects alive. That includes predominantly
+objects that won't ever be accessed again.
 
-This is brittle and doesn't even cover slots.  Requiring the use of
-module-level names simplifies runtime evaluation and provides the
-"one obvious way" to read annotations.  It's the equivalent of absolute
-imports.
+Note that in the case of nested classes, the functionality to get the
+effective "globals" and "locals" at definition time is provided by
+``typing.get_type_hints()``.
+
+
+Disallow local state usage for classes, too
+-------------------------------------------
+
+This PEP originally proposed limiting names within annotations to only
+allow names from the model-level scope, including for classes.  The
+author argued this makes name resolution unambiguous, including in cases
+of conflicts between local names and module-level names.
+
+This idea was ultimately rejected in case of nested classes.  Instead,
+``typing.get_type_hints()`` got modified to populate the local namespace
+correctly if class-level annotations are needed.
+
+The reasons for rejecting the idea were that it goes against the
+intuition of how scoping works in Python, and would break enough
+existing type annotations to make the transition cumbersome.  Finally,
+local scope access is required for class decorators to be able to
+evaluate type annotations. This is because class decorators are applied
+before the class receives its name in the outer scope.
 
 
 Introduce a new dictionary for the string literal form instead
