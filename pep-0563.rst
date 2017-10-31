@@ -259,6 +259,11 @@ Note that in the case of nested classes, the functionality to get the
 effective "globals" and "locals" at definition time is provided by
 ``typing.get_type_hints()``.
 
+If a function generates a class or a function with annotations that
+have to use local variables, it can populate the given generated
+object's ``__annotations__`` dictionary directly, without relying on
+the compiler.
+
 
 Disallow local state usage for classes, too
 -------------------------------------------
