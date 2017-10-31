@@ -1,5 +1,4 @@
-PEP: 563
-Title: Postponed Evaluation of Annotations
+PEP: 563 Title: Postponed Evaluation of Annotations
 Version: $Revision$
 Last-Modified: $Date$
 Author: Łukasz Langa <lukasz@langa.pl>
@@ -66,11 +65,11 @@ and is not discussed further in this document.
 Implementation
 ==============
 
-In a future version of Python, function and variable annotations will no
-longer be evaluated at definition time.  Instead, a string form will be
-preserved in the respective ``__annotations__`` dictionary.  Static type
-checkers will see no difference in behavior, whereas tools using
-annotations at runtime will have to perform postponed evaluation.
+In Python 4.0, function and variable annotations will no longer be
+evaluated at definition time.  Instead, a string form will be preserved
+in the respective ``__annotations__`` dictionary.  Static type checkers
+will see no difference in behavior, whereas tools using annotations at
+runtime will have to perform postponed evaluation.
 
 If an annotation was already a string, this string is preserved
 verbatim.  In other cases, the string form is obtained from the AST
@@ -230,12 +229,16 @@ valid.  They can use local names or the fully qualified name.  Example::
 Deprecation policy
 ------------------
 
-In Python 3.7, a ``__future__`` import is required to use the described
-functionality and a ``PendingDeprecationWarning`` is raised by the
+Starting with Python 3.7, a ``__future__`` import is required to use the
+described functionality.  No warnings are raised.
+
+In Python 3.8 a ``PendingDeprecationWarning`` is raised by the
 compiler in the presence of type annotations in modules without the
-``__future__`` import.  In Python 3.8 the warning becomes a
-``DeprecationWarning``.  In the next version this will become the
-default behavior.
+``__future__`` import.
+
+Starting with Python 3.9 the warning becomes a ``DeprecationWarning``.
+
+In Python 4.0 this will become the default behavior.
 
 
 Rejected Ideas
