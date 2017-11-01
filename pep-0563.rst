@@ -264,7 +264,7 @@ compiler in the presence of type annotations in modules without the
 Starting with Python 3.9 the warning becomes a ``DeprecationWarning``.
 
 In Python 4.0 this will become the default behavior.  Use of annotations
-incompatible with typing is no longer supported.
+incompatible with this PEP is no longer supported.
 
 
 Forward References
