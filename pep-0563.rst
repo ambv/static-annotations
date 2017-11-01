@@ -254,8 +254,8 @@ In Python 4.0 this will become the default behavior.
 Forward References
 ==================
 
-Deliberately using a name before it was defined in module is called a
-forward reference.
+Deliberately using a name before it was defined in the module is called
+a forward reference.
 
 While forward references in type annotations cease to be a problem,
 use cases outside of annotations still require using string literals.
