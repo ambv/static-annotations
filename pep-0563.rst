@@ -205,14 +205,21 @@ arbitrary objects to be directly present in annotations will break
 if they are not using ``typing.get_type_hints()`` or ``eval()``.
 
 Annotations that depend on locals at the time of the function
-definition are now invalid.  Example::
+definition will not be resolvable later.  Example::
 
-    def generate_class():
-        some_local = datetime.datetime.now()
+    def generate():
+        A = Optional[int]
         class C:
-            field: some_local = 1  # NOTE: INVALID ANNOTATION
-            def method(self, arg: some_local.day) -> None:  # NOTE: INVALID ANNOTATION
-                ...
+            field: A = 1
+            def method(self, arg: A) -> None: ...
+        return C
+    X = generate()
+
+Trying to resolve annotations of ``X`` later by using
+``get_type_hints(X)`` will fail because ``A`` and its enclosing scope no
+longer exists.  Python will make no attempt to disallow such annotations
+since they can often still be successfully statically analyzed, which is
+the predominant use case for annotations.
 
 Annotations using nested classes and their respective state are still
 valid.  They can use local names or the fully qualified name.  Example::
@@ -231,9 +238,9 @@ valid.  They can use local names or the fully qualified name.  Example::
                 ...
 
 In the presence of an annotation that isn't a syntactically valid
-expression, SyntaxError is raised at compile time.  Since names aren't
-resolved at that time, no attempt is made to validate whether used
-names are accessible or not.
+expression, SyntaxError is raised at compile time.  However, since names
+aren't resolved at that time, no attempt is made to validate whether
+used names are correct or not.
 
 
 Deprecation policy
