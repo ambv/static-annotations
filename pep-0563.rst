@@ -57,6 +57,11 @@ As described in PEP 484, using ``@typing.no_type_check`` in this case is
 recommended to disambiguate the use case.  ``# type: ignore`` comments
 are also available for this purpose.  Refer to PEP 484 for details.
 
+This PEP is meant to solve the problem of forward references in type
+annotations.  There are still cases outside of annotations where
+forward references will require usage of string literals.  Those are
+listed in a later section of this document.
+
 Annotations without forced evaluation enable opportunities to improve
 the syntax of type hints.  This idea will require its own separate PEP
 and is not discussed further in this document.
@@ -246,6 +251,37 @@ Starting with Python 3.9 the warning becomes a ``DeprecationWarning``.
 In Python 4.0 this will become the default behavior.
 
 
+Forward References
+==================
+
+Deliberately using a name before it was defined in module is called a
+forward reference.
+
+While forward references in type annotations cease to be a problem,
+use cases outside of annotations still require using string literals.
+This includes:
+
+* forward references in function calls::
+
+    T = TypeVar('T', bound='UserId')
+    Employee = NamedTuple('Employee', [('name', str), ('id', 'UserId')])
+    UserId = NewType('UserId', 'SomeType')
+    return cast('SomeType', value)
+
+* forward references in indexing::
+
+    Alias = Optional['SomeType']
+
+* forward references as base classes::
+
+    class C(Tuple['OtherType', 'OtherType']): ...
+    class OtherType('SomeType'): ...
+
+Depending on the specific case, some of those might be worked around by
+using the ``if TYPE_CHECKING:`` block.  A generic solution for the
+single-pass nature of Python module parsing is out of scope for this PEP.
+
+
 Rejected Ideas
 ==============
 
@@ -408,18 +444,9 @@ specifies.  This idea was received well.  Ivan Levkivskyi supported
 using the ``__future__`` import and suggested unparsing the AST in
 ``compile.c``.  Jukka Lehtosalo pointed out that there are some cases
 of forward references where types are used outside of annotations and
-postponed evaluation will not help those:
-
-    * ``Alias = <type>``
-    * ``cast(<type>, e)``
-    * ``T = TypeVar('T', <type>, ...)``
-    * ``T = TypeVar('T', bound=<type>)``
-    * ``T = NewType('T', <type>)``
-    * Non-class-based syntax for named tuples
-    * Generic base classes
-
-For those cases using the string literal notation would still be
-required.
+postponed evaluation will not help those.  For those cases using the
+string literal notation would still be required.  Those cases are
+discussed briefly in the "Forward References" section of this PEP.
 
 The biggest controversy on the issue was Guido van Rossum's concern
 that untokenizing annotation expressions back to their string form has
