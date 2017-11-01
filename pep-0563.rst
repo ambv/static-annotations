@@ -162,7 +162,6 @@ class and its base classes (in the method resolution order).  Since slots
 can only be filled after the class was defined, we don't need to consult
 them for this purpose.
 
-
 Runtime annotation resolution and class decorators
 --------------------------------------------------
 
@@ -181,7 +180,6 @@ current class.  Example::
 
 This was already true before this PEP.  The class decorator acts on
 the class before it's assigned a name in the current definition scope.
-
 
 Runtime annotation resolution and ``TYPE_CHECKING``
 ---------------------------------------------------
@@ -253,7 +251,6 @@ expression, SyntaxError is raised at compile time.  However, since names
 aren't resolved at that time, no attempt is made to validate whether
 used names are correct or not.
 
-
 Deprecation policy
 ------------------
 
@@ -324,7 +321,6 @@ have to use local variables, it can populate the given generated
 object's ``__annotations__`` dictionary directly, without relying on
 the compiler.
 
-
 Disallow local state usage for classes, too
 -------------------------------------------
 
@@ -343,7 +339,6 @@ existing type annotations to make the transition cumbersome.  Finally,
 local scope access is required for class decorators to be able to
 evaluate type annotations. This is because class decorators are applied
 before the class receives its name in the outer scope.
-
 
 Introduce a new dictionary for the string literal form instead
 --------------------------------------------------------------
@@ -373,7 +368,6 @@ recognize that forward references are allowed.
 
 Finally, just-in-time evaluation in ``__annotations__`` is an
 unnecessary step if ``get_type_hints()`` is used later.
-
 
 Drop annotations with -O
 ------------------------
