@@ -1,4 +1,5 @@
-PEP: 563 Title: Postponed Evaluation of Annotations
+PEP: 563
+Title: Postponed Evaluation of Annotations
 Version: $Revision$
 Last-Modified: $Date$
 Author: Łukasz Langa <lukasz@langa.pl>
@@ -302,14 +303,14 @@ forward references with string literals.  The list includes:
 
 Depending on the specific case, some of the cases listed above might be
 worked around by placing the usage in a ``if TYPE_CHECKING:`` block.
-Notably, this will not work for base classes and casting.  For named
-tuples, using the new class definition syntax introduced in Python 3.6
-solves the issue.
+This will not work for any code that needs to be available at runtime,
+notably for base classes and casting.  For named tuples, using the new
+class definition syntax introduced in Python 3.6 solves the issue.
 
-In general, to remove the need to use string literals for *any* forward
-reference requires changing how module instantiation is performed in
-Python, from the current single-pass top-down model.  This would be a
-major change in the language and is out of scope for this PEP.
+In general, fixing the issue for *all* forward references requires
+changing how module instantiation is performed in Python, from the
+current single-pass top-down model.  This would be a major change in the
+language and is out of scope for this PEP.
 
 
 Rejected Ideas
