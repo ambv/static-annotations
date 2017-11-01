@@ -288,10 +288,9 @@ This includes:
 
     Alias = Optional['SomeType']
 
-* forward references as base classes::
+* forward references as part of base classes::
 
     class C(Tuple['OtherType', 'OtherType']): ...
-    class OtherType('SomeType'): ...
 
 Depending on the specific case, some of those might be worked around by
 using the ``if TYPE_CHECKING:`` block.  A generic solution for the
