@@ -271,30 +271,45 @@ Forward References
 ==================
 
 Deliberately using a name before it was defined in the module is called
-a forward reference.
+a forward reference.  For the purpose of this section, we'll call
+any name imported or defined within a ``if TYPE_CHECKING:`` block
+a forward reference, too.
 
-While forward references in type annotations cease to be a problem,
-use cases outside of annotations still require using string literals.
-This includes:
+This PEP addresses the issue of forward references in *type annotations*.
+The use of string literals will no longer be required in this case.
+However, there are APIs in the ``typing`` module that use other syntactic
+constructs of the language, and those will still require working around
+forward references with string literals.  The list includes:
 
-* forward references in function calls::
+* type definitions::
 
     T = TypeVar('T', bound='UserId')
-    Employee = NamedTuple('Employee', [('name', str), ('id', 'UserId')])
     UserId = NewType('UserId', 'SomeType')
-    return cast('SomeType', value)
+    Employee = NamedTuple('Employee', [('name', str), ('id', 'UserId')])
 
-* forward references in indexing::
+* aliases::
 
     Alias = Optional['SomeType']
+    AnotherAlias = Union['SomeType', 'OtherType']
 
-* forward references as part of base classes::
+* casting::
 
-    class C(Tuple['OtherType', 'OtherType']): ...
+    cast('SomeType', value)
 
-Depending on the specific case, some of those might be worked around by
-using the ``if TYPE_CHECKING:`` block.  A generic solution for the
-single-pass nature of Python module parsing is out of scope for this PEP.
+* base classes::
+
+    class C(Tuple['SomeType', 'OtherType']): ...
+
+Depending on the specific case, some of the cases listed above might be
+worked around by placing the usage in a ``if TYPE_CHECKING:`` block.
+Notably, this will not work for base classes and casting.  For named
+tuples, using the new class definition syntax introduced in Python 3.6
+solves the issue.
+
+In general, to remove the need to use string literals for *any* forward
+reference requires changing how module instantiation is performed in
+Python, from the current single-pass top-down model.  This would be a
+major change in the language and is out of scope for this PEP.
 
 
 Rejected Ideas
