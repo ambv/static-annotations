@@ -52,11 +52,6 @@ Just like in PEP 484 and PEP 526, it should be emphasized that **Python
 will remain a dynamically typed language, and the authors have no desire
 to ever make type hints mandatory, even by convention.**
 
-Annotations are still available for arbitrary use besides type checking.
-As described in PEP 484, using ``@typing.no_type_check`` in this case is
-recommended to disambiguate the use case.  ``# type: ignore`` comments
-are also available for this purpose.  Refer to PEP 484 for details.
-
 This PEP is meant to solve the problem of forward references in type
 annotations.  There are still cases outside of annotations where
 forward references will require usage of string literals.  Those are
@@ -65,6 +60,22 @@ listed in a later section of this document.
 Annotations without forced evaluation enable opportunities to improve
 the syntax of type hints.  This idea will require its own separate PEP
 and is not discussed further in this document.
+
+Non-typing usage of annotations
+-------------------------------
+
+While annotations are still available for arbitrary use besides type
+checking, it is worth mentioning that the design of this PEP, as well
+as its precursors (PEP 484 and PEP 526), is predominantly motivated by
+the type hinting use case.
+
+With Python 3.7, PEP 484 graduates from provisional status.  Other
+enhancements to the Python programming language like PEP 544, PEP 557,
+or PEP 560, are already being built on this basis as they depend on
+type annotations and the ``typing`` module as defined by PEP 484.
+
+With this in mind, uses for annotations incompatible with the
+aforementioned PEPs should be considered deprecated.
 
 
 Implementation
@@ -255,7 +266,8 @@ compiler in the presence of type annotations in modules without the
 
 Starting with Python 3.9 the warning becomes a ``DeprecationWarning``.
 
-In Python 4.0 this will become the default behavior.
+In Python 4.0 this will become the default behavior.  Use of annotations
+incompatible with typing is no longer supported.
 
 
 Forward References
