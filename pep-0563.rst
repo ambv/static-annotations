@@ -320,8 +320,8 @@ language and is out of scope for this PEP.
 Rejected Ideas
 ==============
 
-Keep the ability to use function local state when defining annotations
-----------------------------------------------------------------------
+Keeping the ability to use function local state when defining annotations
+-------------------------------------------------------------------------
 
 With postponed evaluation, this would require keeping a reference to
 the frame in which an annotation got created.  This could be achieved
@@ -340,8 +340,8 @@ have to use local variables, it can populate the given generated
 object's ``__annotations__`` dictionary directly, without relying on
 the compiler.
 
-Disallow local state usage for classes, too
--------------------------------------------
+Disallowing local state usage for classes, too
+----------------------------------------------
 
 This PEP originally proposed limiting names within annotations to only
 allow names from the model-level scope, including for classes.  The
@@ -359,8 +359,8 @@ local scope access is required for class decorators to be able to
 evaluate type annotations. This is because class decorators are applied
 before the class receives its name in the outer scope.
 
-Introduce a new dictionary for the string literal form instead
---------------------------------------------------------------
+Introducing a new dictionary for the string literal form instead
+----------------------------------------------------------------
 
 Yury Selivanov shared the following idea:
 
@@ -388,8 +388,8 @@ recognize that forward references are allowed.
 Finally, just-in-time evaluation in ``__annotations__`` is an
 unnecessary step if ``get_type_hints()`` is used later.
 
-Drop annotations with -O
-------------------------
+Dropping annotations with -O
+----------------------------
 
 There are two reasons this is not satisfying for the purpose of this
 PEP.
