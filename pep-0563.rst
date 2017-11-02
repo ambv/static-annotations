@@ -90,8 +90,8 @@ runtime will have to perform postponed evaluation.
 
 If an annotation was already a string, this string is preserved
 verbatim.  In other cases, the string form is obtained from the AST
-during the compilation step, which means that the string form preserved
-might not preserve the exact formatting of the source.
+during the compilation step, which means that the string form might not
+preserve the exact formatting of the source.
 
 Annotations need to be syntactically valid Python expressions, also when
 passed as literal strings (i.e. ``compile(literal, '', 'eval')``).
@@ -129,10 +129,10 @@ annotation.
 
 In both cases it's important to consider how globals and locals affect
 the postponed evaluation.  An annotation is no longer evaluated at the
-time of definition and, more importantly, *in the same scope* it was
-defined.  Consequently, using local state in annotations is no longer
-possible in general.  As for globals, the module where the annotation
-was defined is the correct context for postponed evaluation.
+time of definition and, more importantly, *in the same scope* where it
+was defined.  Consequently, using local state in annotations is no
+longer possible in general.  As for globals, the module where the
+annotation was defined is the correct context for postponed evaluation.
 
 The ``get_type_hints()`` function automatically resolves the correct
 value of ``globalns`` for functions and classes.  It also automatically
