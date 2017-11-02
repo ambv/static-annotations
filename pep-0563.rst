@@ -348,7 +348,7 @@ allow names from the model-level scope, including for classes.  The
 author argued this makes name resolution unambiguous, including in cases
 of conflicts between local names and module-level names.
 
-This idea was ultimately rejected in case of nested classes.  Instead,
+This idea was ultimately rejected in case of classes.  Instead,
 ``typing.get_type_hints()`` got modified to populate the local namespace
 correctly if class-level annotations are needed.
 
