@@ -247,6 +247,9 @@ valid.  They can use local names or the fully qualified name.  Example::
             def method(self, arg: field) -> D.field2:  # this is OK
                 ...
 
+            def method(self, arg: field) -> field2:  # this is OK
+                ...
+
 In the presence of an annotation that isn't a syntactically valid
 expression, SyntaxError is raised at compile time.  However, since names
 aren't resolved at that time, no attempt is made to validate whether
