@@ -284,22 +284,23 @@ forward references with string literals.  The list includes:
 
 * type definitions::
 
-    T = TypeVar('T', bound='UserId')
-    UserId = NewType('UserId', 'SomeType')
-    Employee = NamedTuple('Employee', [('name', str), ('id', 'UserId')])
+    T = TypeVar('T', bound='<type>')
+    UserId = NewType('UserId', '<type>')
+    Employee = NamedTuple('Employee', [('name', '<type>', ('id', '<type>')])
 
 * aliases::
 
-    Alias = Optional['SomeType']
-    AnotherAlias = Union['SomeType', 'OtherType']
+    Alias = Optional['<type>']
+    AnotherAlias = Union['<type>', '<type>']
+    YetAnotherAlias = '<type>'
 
 * casting::
 
-    cast('SomeType', value)
+    cast('<type>', value)
 
 * base classes::
 
-    class C(Tuple['SomeType', 'OtherType']): ...
+    class C(Tuple['<type>', '<type>']): ...
 
 Depending on the specific case, some of the cases listed above might be
 worked around by placing the usage in a ``if TYPE_CHECKING:`` block.
