@@ -236,19 +236,32 @@ valid.  They can use local names or the fully qualified name.  Example::
 
     class C:
         field = 'c_field'
-        def method(self, arg: C.field) -> None:  # this is OK
+        def method(self) -> C.field:  # this is OK
+            ...
+
+        def method(self) -> field:  # this is OK
+            ...
+
+        def method(self) -> C.D:  # this is OK
+            ...
+
+        def method(self) -> D:  # this is OK
             ...
 
         class D:
             field2 = 'd_field'
-            def method(self, arg: C.field) -> C.D.field2:  # this is OK
+            def method(self) -> C.D.field2:  # this is OK
                 ...
 
-            def method(self, arg: field) -> D.field2:  # this is OK
+            def method(self) -> D.field2:  # this is OK
                 ...
 
-            def method(self, arg: field) -> field2:  # this is OK
+            def method(self) -> field2:  # this is OK
                 ...
+
+            def method(self) -> field:  # this FAILS, class D doesn't
+                ...                     # see C's attributes,  This was
+                                        # already true before this PEP.
 
 In the presence of an annotation that isn't a syntactically valid
 expression, SyntaxError is raised at compile time.  However, since names
