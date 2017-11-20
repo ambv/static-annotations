@@ -108,7 +108,7 @@ Enabling the future behavior in Python 3.7
 The functionality described above can be enabled starting from Python
 3.7 using the following special import::
 
-    from __future__ import string_annotations
+    from __future__ import annotations
 
 
 Resolving Type Hints at Runtime
