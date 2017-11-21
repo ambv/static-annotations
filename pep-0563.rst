@@ -91,10 +91,10 @@ in the respective ``__annotations__`` dictionary.  Static type checkers
 will see no difference in behavior, whereas tools using annotations at
 runtime will have to perform postponed evaluation.
 
-If an annotation was already a string, this string is preserved
-verbatim.  In other cases, the string form is obtained from the AST
-during the compilation step, which means that the string form might not
-preserve the exact formatting of the source.
+The string form is obtained from the AST during the compilation step,
+which means that the string form might not preserve the exact formatting
+of the source.  Note: if an annotation was a string literal already, it
+will still be wrapped in a string.
 
 Annotations need to be syntactically valid Python expressions, also when
 passed as literal strings (i.e. ``compile(literal, '', 'eval')``).
