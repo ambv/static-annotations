@@ -658,6 +658,7 @@ static typing, with topic like the import time of the ``typing``
 module (which is comparable to ``re`` without dependencies, and
 three times as heavy as ``re`` when counting dependencies).
 
+
 Acknowledgements
 ================
 
