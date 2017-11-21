@@ -561,6 +561,61 @@ helper, which could solve self-referencing classes even in the form of a
 class decorator.  He suggested the PEP should provide this helper
 function in the standard library.
 
+Second draft discussion on python-dev
+-------------------------------------
+
+Discussion happened mainly in the `announcement thread <https://mail.python.org/pipermail/python-dev/2017-November/150062.html>`_,
+followed by a brief discussion under `Mark Shannon's post
+<https://mail.python.org/pipermail/python-dev/2017-November/150637.html>`_.
+
+Steven D'Aprano was concerned whether it's acceptable for typos to be
+allowed in annotations after the change proposed by the PEP.  Brett
+Cannon responded that type checkers and other static analyzers (like
+linters or programming text editors) will catch this type of error.
+Jukka Lehtosalo added that this situation is analogous to how names in
+function bodies are not resolved until the function is called.
+
+A major topic of discussion was Nick Coghlan's suggestion to store
+annotations in "thunk form", in other words as a specialized lambda
+which would be able to access class-level scope (and allow for scope
+customization at call time).  He presented a possible design for it
+(`indirect attribute cells
+<https://mail.python.org/pipermail/python-dev/2017-November/150141.html>`_).
+This was later seen as equivalent to "special forms" in Lisp.  Guido van
+Rossum expressed worry that this sort of feature cannot be safely
+implemented in twelve weeks (i.e. in time before the Python 3.7 beta
+freeze).
+
+After a while it became clear that the point of division between
+supporters of the string form vs. supporters of the thunk form is
+actually about whether annotations should be perceived as a general
+syntactic element vs. something tied to the type checking use case.
+
+Finally, Guido van Rossum declared he's rejecting the thunk idea
+based on the fact that it would require a new building block in the
+interpreter.  This block would be exposed in annotations, multiplying
+possible types of values stored in ``__annotations__`` (arbitrary
+objects, strings, and now thunks).  Moreover, thunks aren't as
+introspectable as strings.  Most importantly, Guido van Rossum
+explicitly stated interest in gradually restricting the use of
+annotations to static typing (with an optional runtime component).
+
+Nick Coghlan got convinced to PEP 563, too, promptly beginning
+the mandatory bike shedding session on the name of the ``__future__``
+import.  Many debaters agreed that ``annotations`` seems like
+an overly broad name for the feature name.  Guido van Rossum briefly
+decided to call it ``string_annotations`` but then changed his mind,
+arguing that ``division`` is a precedent of a broad name with a clear
+meaning.
+
+The final improvement to the PEP suggested in the discussion by Mark
+Shannon was the rejection of the temptation to pass string literals
+through to ``__annotations__`` verbatim.
+
+A side-thread of discussion started around the runtime penalty of
+static typing, with topic like the import time of the ``typing``
+module (which is comparable to ``re`` without dependencies, and
+three times as heavy as ``re`` when counting dependencies).
 
 Acknowledgements
 ================
