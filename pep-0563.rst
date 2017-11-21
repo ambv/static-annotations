@@ -350,6 +350,11 @@ This would be prohibitively expensive for highly annotated code as the
 frames would keep all their objects alive. That includes predominantly
 objects that won't ever be accessed again.
 
+To be able to address class-level scope, the lambda approach would
+require a new kind of cell in the interpreter.  This would proliferate
+the number of types that can appear in ``__annotations__``, as well as
+wouldn't be as introspectable as strings.
+
 Note that in the case of nested classes, the functionality to get the
 effective "globals" and "locals" at definition time is provided by
 ``typing.get_type_hints()``.
@@ -426,6 +431,42 @@ All that being said, a granular -O option to drop annotations is
 a possibility in the future, as it's conceptually compatible with
 existing -O behavior (dropping docstrings and assert statements).  This
 PEP does not invalidate the idea.
+
+Pass string literals in annotations verbatim to ``__annotations__``
+-------------------------------------------------------------------
+
+This PEP originally suggested directly storing the contents of a string
+literal under its respective key in ``__annotations__``.  This was
+meant to simplify support for runtime type checkers.
+
+Mark Shannon pointed out this idea was flawed since it wasn't handling
+situations where strings are only part of a type annotation.
+
+The inconsistency of it was always apparent but given that it doesn't
+fully prevent cases of double-wrapping strings anyway, it is not worth
+it.
+
+Make the name of the future import more verbose
+-----------------------------------------------
+
+Instead of requiring the following import::
+
+    from __future__ import annotations
+
+the PEP could call the feature more explicitly, for example
+``string_annotations``, ``stringify_annotations``,
+``annotation_strings``, ``annotations_as_strings``, ``lazy_anotations``,
+``static_annotations``, etc.
+
+The problem with those names is that they are very verbose.  Each of
+them besides ``lazy_annotations`` would constitute the longest future
+feature name in Python.  They are long to type and harder to remember
+than the single-word form.
+
+There is precedence of a future import name that sounds overly generic
+but in practice was obvious to users as to what it does::
+
+    from __future__ import division
 
 
 Prior discussion
