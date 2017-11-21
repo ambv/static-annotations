@@ -113,6 +113,9 @@ The functionality described above can be enabled starting from Python
 
     from __future__ import annotations
 
+A reference implementation of this functionality is available
+`on GitHub <https://github.com/ambv/cpython/tree/string_annotations>`_.
+
 
 Resolving Type Hints at Runtime
 ===============================
