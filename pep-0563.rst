@@ -4,13 +4,13 @@ Version: $Revision$
 Last-Modified: $Date$
 Author: Łukasz Langa <lukasz@langa.pl>
 Discussions-To: Python-Dev <python-dev@python.org>
-Status: Draft
+Status: Accepted
 Type: Standards Track
 Content-Type: text/x-rst
 Created: 8-Sep-2017
 Python-Version: 3.7
 Post-History: 1-Nov-2017, 21-Nov-2017
-Resolution:
+Resolution: https://mail.python.org/pipermail/python-dev/2017-December/151042.html
 
 
 Abstract
